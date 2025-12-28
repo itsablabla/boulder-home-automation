@@ -1,0 +1,45 @@
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Docker volumes and data
+mosquitto/data/
+mosquitto/log/
+node-red/data/
+frigate/storage/
+postgres/data/
+nginx/html/
+
+# Mosquitto password file
+mosquitto/config/password.txt
+
+# Node-RED credentials
+node-red/.credentials.json
+node-red/.sessions.json
+node-red/.config.json
+
+# Logs
+*.log
+logs/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Backup files
+*.backup
+*.bak
+*.old
+
+# Temporary files
+tmp/
+temp/
+*.tmp
