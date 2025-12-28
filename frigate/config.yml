@@ -1,0 +1,155 @@
+# Frigate AI Object Detection Configuration
+# Boulder House - 22 UniFi Protect Cameras
+
+mqtt:
+  host: mosquitto
+  port: 1883
+  topic_prefix: frigate
+  client_id: frigate-boulder
+  user: "{FRIGATE_MQTT_USER}"
+  password: "{FRIGATE_MQTT_PASSWORD}"
+
+# Database for event history
+database:
+  path: /media/frigate/frigate.db
+
+# Detectors - using CPU (can upgrade to Coral TPU)
+detectors:
+  cpu:
+    type: cpu
+    num_threads: 4
+
+# Global object detection settings
+objects:
+  track:
+    - person
+    - car
+    - dog
+    - cat
+    - package
+  filters:
+    person:
+      min_area: 5000
+      max_area: 100000
+      threshold: 0.7
+    car:
+      min_area: 15000
+      max_area: 500000
+      threshold: 0.7
+    package:
+      min_area: 2000
+      max_area: 50000
+      threshold: 0.6
+
+# Recording settings
+record:
+  enabled: true
+  retain:
+    days: 7
+    mode: motion
+  events:
+    retain:
+      default: 30
+      mode: active_objects
+
+# Snapshot settings
+snapshots:
+  enabled: true
+  timestamp: true
+  bounding_box: true
+  crop: false
+  retain:
+    default: 30
+
+# Live view settings
+live:
+  stream_name: hq
+  quality: 8
+
+# RTSP Restreaming
+go2rtc:
+  streams:
+    # Front door cameras will be defined per camera below
+
+# Camera configurations
+cameras:
+  # Example camera - repeat for all 22 cameras
+  front_door:
+    enabled: true
+    ffmpeg:
+      inputs:
+        - path: rtsp://192.168.10.49:7447/{camera_id}?enableSrtp
+          roles:
+            - detect
+            - record
+        - path: rtsp://192.168.10.49:7447/{camera_id}_sub?enableSrtp
+          roles:
+            - record
+    detect:
+      width: 1920
+      height: 1080
+      fps: 5
+      enabled: true
+    motion:
+      mask:
+        # Define motion masks to ignore trees, flags, etc.
+        # Format: x1,y1,x2,y2,x3,y3...
+    zones:
+      entrance:
+        coordinates: 0,1080,400,1080,400,700,0,700
+        objects:
+          - person
+          - package
+      driveway:
+        coordinates: 400,1080,1920,1080,1920,700,400,700
+        objects:
+          - person
+          - car
+    objects:
+      track:
+        - person
+        - car
+        - package
+    snapshots:
+      enabled: true
+      timestamp: true
+      bounding_box: true
+      crop: true
+      required_zones:
+        - entrance
+        - driveway
+    record:
+      enabled: true
+      retain:
+        days: 7
+        mode: motion
+      events:
+        retain:
+          default: 30
+
+  # TODO: Add remaining 21 cameras
+  # - back_yard
+  # - side_gate_left
+  # - side_gate_right
+  # - garage_interior
+  # - garage_exterior
+  # - basement_entrance
+  # - etc...
+
+# Notifications via MQTT
+notifications:
+  enabled: true
+  mqtt:
+    enabled: true
+
+# UI Configuration
+ui:
+  use_experimental: false
+  live_mode: mse
+  strftime_fmt: "%Y-%m-%d %H:%M:%S"
+
+# Logger
+logger:
+  default: info
+  logs:
+    frigate.mqtt: warning
